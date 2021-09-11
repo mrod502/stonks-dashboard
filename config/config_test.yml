@@ -1,0 +1,9 @@
+clientconfig:
+    baseconfig:
+        port: 1234
+        enable_websocket: true
+        enable_tls: true
+    api_key: "abcdefgh"
+    prefix: "test"
+    remote_ip: "127.0.0.1"
+    log_locally: true
