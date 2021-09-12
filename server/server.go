@@ -65,10 +65,10 @@ func (s *Router) serveSubreddits(w http.ResponseWriter, r *http.Request) {
 
 func (s *Router) setupRoutes() {
 	s.r.HandleFunc("/reddit", s.serveSubreddits).Methods(http.MethodGet)
-	s.r.HandleFunc("/finviz-home-table", s.serveFinvizHomeTable)
+	s.r.HandleFunc("/finviz-home", s.serveFinvizHome)
 }
 
-func (s *Router) serveFinvizHomeTable(w http.ResponseWriter, r *http.Request) {
+func (s *Router) serveFinvizHome(w http.ResponseWriter, r *http.Request) {
 	v, err := s.fin.Home()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

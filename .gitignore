@@ -1,0 +1,5 @@
+config.yml
+*.rpi
+*.lnx
+*.osx
+*.exe

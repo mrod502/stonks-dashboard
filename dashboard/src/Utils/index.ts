@@ -1,15 +1,15 @@
-import fetch from 'isomorphic-fetch';
+import {default as isoFetch} from 'isomorphic-fetch';
 
 export type RequestMethod = "GET" | "PUT" | "POST" | "DELETE" | "PATCH"
 
 
-export default async <R = any>(
+export const fetch = async  <R = any>(
   url:string,
   method?:RequestMethod,
   body?:BodyInit,
 ):Promise<R> => {
 
-  const response = await fetch(url,{method, body});
+  const response = await isoFetch(url,{method, body});
   if (!response.ok) {
     let detailedError:string;
     try {
@@ -18,8 +18,7 @@ export default async <R = any>(
       detailedError = `${err}`;
     }
     console.error(`${method}:${url}`, detailedError)
-    throw new Error(detailedError)    
+    throw new Error(detailedError)
   };
   return await response.json();
-  
 }

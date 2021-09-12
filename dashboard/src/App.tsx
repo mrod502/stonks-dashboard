@@ -4,7 +4,6 @@ import {
   BrowserRouter as Router,
   Switch,
   Route,
-  Link
 } from "react-router-dom";
 
 import {
@@ -13,20 +12,13 @@ import {
 
 function App() {
   return (
-    <Router>
+
       <div className="App">
         <MenuBar>
 
-        
         </MenuBar>
       </div>
 
-      <Switch>
-        <Route path="/">
-          <Home/>
-        </Route>
-      </Switch>
-    </Router>
   );
 }
 
