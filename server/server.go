@@ -45,7 +45,7 @@ func NewRouter(cfg RouterConfig, log logger.Client) (*Router, error) {
 		port:  cfg.Port,
 	}
 	if cfg.CacheExpiration > 0 {
-		fmt.Printf("CACHE DURATION:%v\n", cfg.CacheExpiration)
+		logger.Info("CACHE DURATION", fmt.Sprintf("%v", cfg.CacheExpiration))
 		r.cache.WithExpiration(cfg.CacheExpiration)
 	}
 	r.setupRoutes()
