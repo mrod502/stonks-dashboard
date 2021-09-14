@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"time"
 
 	"github.com/mrod502/logger"
 	"github.com/mrod502/stonks-dashboard/config"
@@ -37,10 +36,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	router, err := server.NewRouter(server.RouterConfig{
-		CacheExpiration: time.Minute * 3,
-		Port:            1234,
-	}, log)
+	router, err := server.NewRouter(cfg.RouterConfig, log)
 	if err != nil {
 		panic(err)
 	}
