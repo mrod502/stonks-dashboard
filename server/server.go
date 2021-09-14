@@ -40,11 +40,12 @@ func NewRouter(cfg RouterConfig, log logger.Client) (*Router, error) {
 		r:     mux.NewRouter(),
 		cache: gocache.NewInterfaceCache(),
 		log:   log,
-		red:   reddit.NewClient(5 * time.Minute),
+		red:   reddit.NewClient(cfg.CacheExpiration),
 		fin:   fcli,
 		port:  cfg.Port,
 	}
 	if cfg.CacheExpiration > 0 {
+		fmt.Printf("CACHE DURATION:%v\n", cfg.CacheExpiration)
 		r.cache.WithExpiration(cfg.CacheExpiration)
 	}
 	r.setupRoutes()
@@ -83,8 +84,38 @@ func (s *Router) serveSubreddits(w http.ResponseWriter, r *http.Request) {
 
 func (s *Router) setupRoutes() {
 	s.r.HandleFunc("/reddit/{sub}", s.serveSubreddits).Methods(http.MethodGet)
-	s.r.HandleFunc("/reddit/{sub}/{msgId}", s.serveSubreddits).Methods(http.MethodGet)
+	s.r.HandleFunc("/reddit/{sub}/{msgId}", s.serveReplies).Methods(http.MethodGet)
 	s.r.HandleFunc("/finviz-home", s.serveFinvizHome)
+}
+
+func (s *Router) serveReplies(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	sub, ok1 := vars["sub"]
+	msgid, ok2 := vars["sub"]
+	if !gocache.And(ok1, ok2) {
+		http.Error(w, "invalid URI", http.StatusBadRequest)
+		s.log.Write("REPLIES", "invalidURI", r.RemoteAddr, r.URL.EscapedPath())
+		return
+	}
+
+	replies, err := s.red.GetPostReplies(sub, msgid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		s.log.Write("REPLIES", "fail-get", err.Error(), r.RemoteAddr, r.URL.EscapedPath())
+		return
+	}
+	b, err := json.Marshal(replies)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		s.log.Write("REPLIES", "unmarshal", err.Error(), r.RemoteAddr, r.URL.EscapedPath())
+		return
+	}
+	_, err = w.Write(b)
+	if err != nil {
+		s.log.Write("REPLIES", "WRITE", err.Error(), r.RemoteAddr, r.URL.EscapedPath())
+	}
+
 }
 
 func (s *Router) serveFinvizHome(w http.ResponseWriter, r *http.Request) {

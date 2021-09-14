@@ -6,11 +6,13 @@ import (
 	"time"
 
 	"github.com/mrod502/logger"
+	"github.com/mrod502/stonks-dashboard/server"
 	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
 	logger.ClientConfig
+	server.RouterConfig
 }
 
 func (c *Config) FromFile(path string) (*Config, error) {
