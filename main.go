@@ -2,6 +2,8 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"time"
 
 	"github.com/mrod502/logger"
 	"github.com/mrod502/stonks-dashboard/config"
@@ -18,9 +20,9 @@ func main() {
 	var configPath = flag.String("cfg", "config.yml", "the config file")
 
 	flag.Parse()
-
+	fmt.Println("config path", *configPath)
 	cfg, err = new(config.Config).FromFile(*configPath)
-
+	fmt.Printf("%+v\n", *cfg)
 	if err != nil {
 		panic(err)
 	}
@@ -30,11 +32,18 @@ func main() {
 	}
 
 	log.SetLogLocally(true)
-	log.WriteLog("STONKS", "initializing...")
-	router, err := server.NewRouter(server.RouterConfig{}, log)
+	log.Write("STONKS", "initializing...")
+	err = log.Connect()
 	if err != nil {
 		panic(err)
 	}
-
+	router, err := server.NewRouter(server.RouterConfig{
+		CacheExpiration: time.Minute * 3,
+		Port:            1234,
+	}, log)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("serving")
 	router.Serve()
 }

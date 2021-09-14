@@ -13,7 +13,7 @@ import (
 type fakeLogger struct {
 }
 
-func (f *fakeLogger) WriteLog(v ...string) error {
+func (f *fakeLogger) Write(v ...string) error {
 	return nil
 }
 func (f *fakeLogger) Connect() error {

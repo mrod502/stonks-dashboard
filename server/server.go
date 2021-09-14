@@ -27,8 +27,6 @@ type Router struct {
 }
 
 func (s *Router) Serve() error {
-	s.aggRedditData([]string{"wallstreetbets"})
-	go s.scrapeReddit()
 	return http.ListenAndServe(fmt.Sprintf(":%d", s.port), s.r)
 }
 
@@ -42,7 +40,7 @@ func NewRouter(cfg RouterConfig, log logger.Client) (*Router, error) {
 		r:     mux.NewRouter(),
 		cache: gocache.NewInterfaceCache(),
 		log:   log,
-		red:   reddit.NewClient(),
+		red:   reddit.NewClient(5 * time.Minute),
 		fin:   fcli,
 		port:  cfg.Port,
 	}
@@ -53,39 +51,61 @@ func NewRouter(cfg RouterConfig, log logger.Client) (*Router, error) {
 	return r, nil
 }
 
-func (s *Router) aggRedditData(boards []string) {
-	for _, v := range boards {
-		s.red.AddSub(v)
-	}
-}
-
 func (s *Router) serveSubreddits(w http.ResponseWriter, r *http.Request) {
+	s.log.Write("GET", "subreddit", r.RemoteAddr, r.URL.EscapedPath())
+	v, ok := mux.Vars(r)["sub"]
+
+	if !ok {
+		http.Error(w, "invalid URI", http.StatusBadRequest)
+		return
+	}
+
+	sr, err := s.red.GetSubreddit(v)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		s.log.Write("ERR", "subreddit", "getsub", v, r.RemoteAddr, err.Error())
+		return
+	}
+
+	b, err := json.Marshal(sr)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		s.log.Write("ERR", "subreddit", "marshal", r.RemoteAddr, err.Error())
+		return
+	}
+	s.createHeaders(w)
+	_, err = w.Write(b)
+	if err != nil {
+		s.log.Write("ERR", "subreddit", "write", r.RemoteAddr, err.Error())
+	}
 
 }
 
 func (s *Router) setupRoutes() {
-	s.r.HandleFunc("/reddit", s.serveSubreddits).Methods(http.MethodGet)
+	s.r.HandleFunc("/reddit/{sub}", s.serveSubreddits).Methods(http.MethodGet)
+	s.r.HandleFunc("/reddit/{sub}/{msgId}", s.serveSubreddits).Methods(http.MethodGet)
 	s.r.HandleFunc("/finviz-home", s.serveFinvizHome)
 }
 
 func (s *Router) serveFinvizHome(w http.ResponseWriter, r *http.Request) {
+	s.log.Write("GET", "finviz", r.RemoteAddr)
+	s.createHeaders(w)
 	v, err := s.fin.Home()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	b, err := json.Marshal(v.Signals.Items)
+	b, err := json.Marshal(v)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		s.log.WriteLog("finviz", "write", err.Error())
+		s.log.Write("ERR", "finviz", "marshal", r.RemoteAddr, err.Error())
 		return
 	}
-	w.Write(b)
+	if _, err = w.Write(b); err != nil {
+		s.log.Write("ERR", "finviz", "write", r.RemoteAddr, err.Error())
+	}
 }
 
-func (s *Router) scrapeReddit() {
-	for {
-		time.Sleep(time.Minute)
-		s.red.Refresh()
-	}
+func (s *Router) createHeaders(w http.ResponseWriter) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 }

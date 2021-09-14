@@ -1,9 +1,10 @@
 import React from 'react';
 import {fetch} from '../../Utils'
-
-const FINVIZ_HOME = "finviz-home-table";
+import { DataGrid, GridColDef, GridValueGetterParams } from '@material-ui/data-grid';
+const FINVIZ_HOME = "finviz-home";
 
 export interface SignalProps {
+  id:number
 	Ticker:string;
 	Last:number;
 	Change:number;
@@ -31,26 +32,31 @@ export const Signal = ({ Ticker, Last, Change, Volume, Signal }:SignalProps) => 
   </tr>
 )
 
-export const SignalTable = ({ Items }:SignalTableProps) => (
-  <table>
-    <tbody>
-      <tr>
-        <th>Ticker</th>
-        <th>Last</th>
-        <th>Change</th>
-        <th>Volume</th>
-        <th>Signal</th>
-      </tr>{
-        Items.length > 0 ? Items.map(value => <Signal {...value}/>) :
-        <tr><span>[No data available]</span></tr>
-      }</tbody>
-  </table>
-);
+export const SignalTable = ({Items}:SignalTableProps) => {
+
+  return (
+    <div style={{ height: 400, width: '100%' }}>
+      <span>Finviz</span>
+      <DataGrid  
+        columns={[
+          { field: 'Ticker', headerName: 'Ticker', flex: 1},
+          { field: 'Last', headerName: 'Last', flex: 0.8},
+          { field: 'Change', headerName: 'Change', flex: 1 },
+          { field: 'Volume', headerName: 'Volume', flex: 1 },
+          { field: 'Signal', headerName: 'Signal', flex: 1 },
+        ]}
+        rows={Items}
+      />
+    </div>
+  )
+}
 
 export const getHomeProps = async ():Promise<HomeProps> => {
   try{
-    return await fetch<HomeProps>(`https://${process.env.SERVER_IP}:${process.env.SERVER_PORT}/${FINVIZ_HOME}`)
+    console.log(process.env.REACT_APP_SERVER_IP)
+    return await fetch<HomeProps>(`http://${process.env.REACT_APP_SERVER_IP}:${process.env.REACT_APP_SERVER_PORT}/${FINVIZ_HOME}`)
   }catch(err){
+    console.error(err)
     return {Signals:{Items:[] as SignalProps[]}} as HomeProps ;
   }
 }
