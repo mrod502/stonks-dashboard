@@ -10,6 +10,7 @@ import (
 	"github.com/mrod502/finviz"
 	gocache "github.com/mrod502/go-cache"
 	"github.com/mrod502/logger"
+	"github.com/mrod502/openinsider"
 	"github.com/mrod502/reddit"
 )
 
@@ -23,6 +24,7 @@ type Router struct {
 	log   logger.Client
 	red   *reddit.Client
 	fin   *finviz.Client
+	oi    openinsider.Client
 	port  uint16
 }
 
@@ -35,6 +37,9 @@ func NewRouter(cfg RouterConfig, log logger.Client) (*Router, error) {
 	if err != nil {
 		return nil, err
 	}
+	oi, _ := openinsider.NewClient(openinsider.Options{
+		Ttl: cfg.CacheExpiration,
+	})
 
 	r := &Router{
 		r:     mux.NewRouter(),
@@ -43,6 +48,7 @@ func NewRouter(cfg RouterConfig, log logger.Client) (*Router, error) {
 		red:   reddit.NewClient(cfg.CacheExpiration),
 		fin:   fcli,
 		port:  cfg.Port,
+		oi:    oi,
 	}
 	if cfg.CacheExpiration > 0 {
 		logger.Info("CACHE DURATION", fmt.Sprintf("%v", cfg.CacheExpiration))
@@ -86,6 +92,9 @@ func (s *Router) setupRoutes() {
 	s.r.HandleFunc("/reddit/{sub}", s.serveSubreddits).Methods(http.MethodGet)
 	s.r.HandleFunc("/reddit/{sub}/{msgId}", s.serveReplies).Methods(http.MethodGet)
 	s.r.HandleFunc("/finviz-home", s.serveFinvizHome)
+	s.r.HandleFunc("/open-insider", s.serveClusterBuys).Methods("GET")
+	s.r.HandleFunc("/open-insider", s.serveOiScreener).Methods("POST")
+
 }
 
 func (s *Router) serveReplies(w http.ResponseWriter, r *http.Request) {
@@ -139,4 +148,43 @@ func (s *Router) serveFinvizHome(w http.ResponseWriter, r *http.Request) {
 
 func (s *Router) createHeaders(w http.ResponseWriter) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+}
+
+func (s *Router) serveClusterBuys(w http.ResponseWriter, r *http.Request) {
+
+	ds, err := s.oi.LatestClusterBuys()
+	if err != nil {
+		s.log.Write("ERR", "ClusterBuys", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	b, err := json.Marshal(ds)
+	if err != nil {
+		s.log.Write("ERR", "ClusterBuys", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	_, err = w.Write(b)
+
+	return
+}
+
+func (s *Router) serveOiScreener(w http.ResponseWriter, r *http.Request) {
+	var f = new(openinsider.Filter)
+
+	ds, err := s.oi.Screen(f)
+	if err != nil {
+		s.log.Write("ERR", "Screen", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	b, err := json.Marshal(ds)
+	if err != nil {
+		s.log.Write("ERR", "Screen", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	_, err = w.Write(b)
+
+	return
 }
