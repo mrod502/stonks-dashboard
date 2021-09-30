@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"io/ioutil"
 	"net/http"
 	"testing"
 	"time"
@@ -31,12 +29,15 @@ func TestConcurrency(t *testing.T) {
 	}, new(fakeLogger))
 	go srv.Serve()
 	time.Sleep(time.Second)
-	for i := 0; i < 5; i++ {
+
+	for i := 0; i < 50; i++ {
 		go func() {
-			res, _ := http.Get("http://localhost:1234/reddit")
-			b, _ := ioutil.ReadAll(res.Body)
-			fmt.Println(string(b))
+			for {
+				http.Get("http://localhost:1234/reddit/wallstreetbets")
+				http.Get("http://localhost:1234/finviz-home")
+
+			}
 		}()
 	}
-	time.Sleep(5 * time.Second)
+	time.Sleep(20 * time.Second)
 }

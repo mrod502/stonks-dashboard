@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/mrod502/finviz"
 	gocache "github.com/mrod502/go-cache"
+	"github.com/mrod502/hitbtc"
 	"github.com/mrod502/logger"
 	"github.com/mrod502/reddit"
 )
@@ -23,10 +24,18 @@ type Router struct {
 	log   logger.Client
 	red   *reddit.Client
 	fin   *finviz.Client
+	hb    *hitbtc.Client
 	port  uint16
 }
 
 func (s *Router) Serve() error {
+	//initialize data sources
+	err := s.hb.Connect()
+	if err != nil {
+		s.log.Write("ROUTER", "hbtc", "connect", err.Error())
+	} else {
+		s.hb.AddOrderBookStream("ETHUSDT", "BTCUSDT")
+	}
 	return http.ListenAndServe(fmt.Sprintf(":%d", s.port), s.r)
 }
 
@@ -35,13 +44,17 @@ func NewRouter(cfg RouterConfig, log logger.Client) (*Router, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	hb, err := hitbtc.NewClient()
+	if err != nil {
+		return nil, err
+	}
 	r := &Router{
 		r:     mux.NewRouter(),
 		cache: gocache.NewInterfaceCache(),
 		log:   log,
 		red:   reddit.NewClient(cfg.CacheExpiration),
 		fin:   fcli,
+		hb:    hb,
 		port:  cfg.Port,
 	}
 	if cfg.CacheExpiration > 0 {

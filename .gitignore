@@ -3,3 +3,5 @@ config.yml
 *.lnx
 *.osx
 *.exe
+*.out
+*.test
