@@ -5,10 +5,11 @@ import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 
 import {
-  Home, MenuBarItem
+  Home, MenuBarItem, RedditTable
 } from './Components'
 import { Grid } from '@material-ui/core';
 import { getHomeProps, HomeProps, SignalTable, SignalProps } from './Components/Finviz/HomeTable';
+import { RedditTableProps } from './Components/Reddit/RedditTable';
 
 
 
@@ -27,8 +28,9 @@ const useStyles = makeStyles((theme) => ({
 const  App =() => {
 
   const [finvizHome, setFinvizHome] = useState<HomeProps>({Signals: {Items: [] as SignalProps[]}})
-  useEffect(() => {
-    
+  const [redditData, setRedditData] = useState<RedditTableProps>({data:[]})
+  
+  useEffect(() => {  
     getHomeProps().then(
       res => {
         console.log(res)
@@ -38,10 +40,13 @@ const  App =() => {
         setFinvizHome((res as HomeProps))
       }
   )
-    
   }, [])
 
+
+
   const classes = useStyles();
+
+
   return (
     <div className={`App ${classes.root}`}>
 
@@ -52,6 +57,11 @@ const  App =() => {
           <Grid item sm={12} md={9} lg={6}>
             <Paper className={classes.paper}>
               <SignalTable  Items={finvizHome.Signals.Items}/>
+            </Paper>
+          </Grid>
+          <Grid item sm={12} md={9} lg={6}>
+            <Paper className={classes.paper}>
+              <RedditTable data={[]}/>
             </Paper>
           </Grid>
 
