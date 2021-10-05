@@ -9,9 +9,7 @@ import {
 } from './Components'
 import { Grid } from '@material-ui/core';
 import { getHomeProps, HomeProps, SignalTable, SignalProps } from './Components/Finviz/HomeTable';
-import { RedditTableProps } from './Components/Reddit/RedditTable';
-
-
+import { RedditTableProps, SubredditDataProps, RedditLinkProps, getSubreddit } from './Components/Reddit/RedditTable';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -25,10 +23,14 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-const  App =() => {
+const App = () => {
 
   const [finvizHome, setFinvizHome] = useState<HomeProps>({Signals: {Items: [] as SignalProps[]}})
-  const [redditData, setRedditData] = useState<RedditTableProps>({data:[]})
+  const [redditData, setRedditData] = useState<RedditTableProps>({
+    data: {
+      children: [] as RedditLinkProps[],
+    } as SubredditDataProps
+  } as RedditTableProps)
   
   useEffect(() => {  
     getHomeProps().then(
@@ -40,16 +42,18 @@ const  App =() => {
         setFinvizHome((res as HomeProps))
       }
   )
+  getSubreddit("wallstreetbets").then(
+    res => {
+      console.log('response:',res)
+      setRedditData(res)
+    }
+  )
   }, [])
-
-
-
+  
   const classes = useStyles();
-
 
   return (
     <div className={`App ${classes.root}`}>
-
         <MenuBar>
           <MenuBarItem title="Hello"/>
         </MenuBar>
@@ -61,12 +65,10 @@ const  App =() => {
           </Grid>
           <Grid item sm={12} md={9} lg={6}>
             <Paper className={classes.paper}>
-              <RedditTable data={[]}/>
+              <RedditTable {...redditData}/>
             </Paper>
           </Grid>
-
         </Grid>
-
     </div>
   );
 }
