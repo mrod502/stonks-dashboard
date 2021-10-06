@@ -65,9 +65,7 @@ export interface RedditTableProps {
 }
 
 const RedditTable = ({data}:RedditTableProps) => {
-
-
-
+ 
   return (
     <div>
       <span>Reddit</span>

@@ -108,6 +108,11 @@ func (s *Router) setupRoutes() {
 	s.r.HandleFunc("/finviz-home", s.serveFinvizHome)
 	s.r.HandleFunc("/open-insider", s.serveClusterBuys).Methods("GET")
 	s.r.HandleFunc("/open-insider", s.serveOiScreener).Methods("POST")
+	s.r.HandleFunc("/hitbtc/subscribe", s.subscribeHitBTC)
+
+}
+
+func (s *Router) subscribeHitBTC(w http.ResponseWriter, r *http.Request) {
 
 }
 
