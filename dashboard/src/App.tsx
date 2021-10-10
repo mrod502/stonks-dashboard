@@ -55,7 +55,7 @@ const App = () => {
   return (
     <div className={`App ${classes.root}`}>
         <MenuBar>
-          <MenuBarItem title="Hello"/>
+          <MenuBarItem title="Your wife's boyfriend's favorite website"/>
         </MenuBar>
         <Grid container spacing={3} alignContent="center">
           <Grid item sm={12} md={9} lg={6}>
