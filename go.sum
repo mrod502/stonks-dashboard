@@ -44,8 +44,8 @@ github.com/mrod502/finviz v0.0.0-20210911015813-06783d78657a/go.mod h1:W9UMyZ/55
 github.com/mrod502/go-cache v0.0.0-20210831190302-c9c92cda5149/go.mod h1:Eyz6V2bMwcafh6ADPjveZVu/3G9TMyibAPTBi8vP65A=
 github.com/mrod502/go-cache v0.0.0-20210913000143-3f3bdb48d315 h1:qxAUf3GPauXOYRBvHI1zbX86eMY60RagKQ6buhq4hP0=
 github.com/mrod502/go-cache v0.0.0-20210913000143-3f3bdb48d315/go.mod h1:Eyz6V2bMwcafh6ADPjveZVu/3G9TMyibAPTBi8vP65A=
-github.com/mrod502/hitbtc v1.1.4 h1:kEp83v4hMqy0t9FhZmr2EkMKVOkZ/mPqXYVedzrwJNU=
-github.com/mrod502/hitbtc v1.1.4/go.mod h1:sWxgMgB6qTR6r5GN4E3WTrGgXAqO1hPcM9b3hBkepyM=
+github.com/mrod502/hitbtc v1.2.0 h1:0k3M5U9Cv9jjaje4Aq+9alSGGDDQ7U305RJUez61Bdo=
+github.com/mrod502/hitbtc v1.2.0/go.mod h1:sWxgMgB6qTR6r5GN4E3WTrGgXAqO1hPcM9b3hBkepyM=
 github.com/mrod502/htmlmarshal v0.0.0-20210925120059-61a02b6982fc h1:IcTbPMLPcEfi9p5pJohfLQqtd9bFVY4eS68PthCqy+c=
 github.com/mrod502/htmlmarshal v0.0.0-20210925120059-61a02b6982fc/go.mod h1:GEX/Tvw5np8naNN8UBiXYtauPh9ByPGWikhty9wPdAQ=
 github.com/mrod502/logger v1.1.15 h1:qpImH77Cfxy/nGaaQufL29IyWrZsx0NqBDHFxzxpmYg=

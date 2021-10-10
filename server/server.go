@@ -3,10 +3,12 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 	"github.com/mrod502/finviz"
 	gocache "github.com/mrod502/go-cache"
 	"github.com/mrod502/hitbtc"
@@ -22,11 +24,14 @@ type RouterConfig struct {
 type Router struct {
 	r     *mux.Router
 	cache *gocache.InterfaceCache
+	ob    *gocache.InterfaceCache
+	obc   *gocache.IntCache
 	log   logger.Client
 	red   *reddit.Client
 	fin   *finviz.Client
 	hb    *hitbtc.Client
 	oi    openinsider.Client
+	u     *websocket.Upgrader
 	port  uint16
 }
 
@@ -35,8 +40,6 @@ func (s *Router) Serve() error {
 	err := s.hb.Connect()
 	if err != nil {
 		s.log.Write("ROUTER", "hbtc", "connect", err.Error())
-	} else {
-		s.hb.AddOrderBookStream("ETHUSDT", "BTCUSDT")
 	}
 	return http.ListenAndServe(fmt.Sprintf(":%d", s.port), s.r)
 }
@@ -63,7 +66,10 @@ func NewRouter(cfg RouterConfig, log logger.Client) (*Router, error) {
 		hb:    hb,
 		port:  cfg.Port,
 		oi:    oi,
+		ob:    gocache.NewInterfaceCache(),
+		obc:   gocache.NewIntCache(),
 	}
+	r.createUpgrader()
 	if cfg.CacheExpiration > 0 {
 		logger.Info("CACHE DURATION", fmt.Sprintf("%v", cfg.CacheExpiration))
 		r.cache.WithExpiration(cfg.CacheExpiration)
@@ -106,14 +112,82 @@ func (s *Router) setupRoutes() {
 	s.r.HandleFunc("/reddit/{sub}", s.serveSubreddits).Methods(http.MethodGet)
 	s.r.HandleFunc("/reddit/{sub}/{msgId}", s.serveReplies).Methods(http.MethodGet)
 	s.r.HandleFunc("/finviz-home", s.serveFinvizHome)
-	s.r.HandleFunc("/open-insider", s.serveClusterBuys).Methods("GET")
-	s.r.HandleFunc("/open-insider", s.serveOiScreener).Methods("POST")
+	s.r.HandleFunc("/open-insider", s.serveClusterBuys)
+	s.r.HandleFunc("/open-insider/screener", s.serveOiScreener)
 	s.r.HandleFunc("/hitbtc/subscribe", s.subscribeHitBTC)
+	s.r.HandleFunc("/hitbtc/unsubscribe", s.unsubscribeHitBTC)
 
 }
 
 func (s *Router) subscribeHitBTC(w http.ResponseWriter, r *http.Request) {
+	b, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		s.log.Write(prefix(r), err.Error())
+		return
+	}
+	var symbols []string
+	err = json.Unmarshal(b, &symbols)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		s.log.Write(prefix(r), err.Error())
+		return
+	}
 
+	if err = s.hb.AddOrderBookStream(symbols...); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		s.log.Write(prefix(r), err.Error())
+		return
+	}
+
+	for _, v := range symbols {
+		s.obc.Add(v, 1)
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (s *Router) addOrderbookListener(w http.ResponseWriter, r *http.Request) error {
+	conn, err := s.u.Upgrade(w, r, nil)
+	if err != nil {
+		return err
+	}
+	s.ob.Set(r.RemoteAddr, conn)
+	return nil
+}
+
+func (s *Router) unsubscribeHitBTC(w http.ResponseWriter, r *http.Request) {
+	b, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		s.log.Write(prefix(r), err.Error())
+		return
+	}
+	var symbols []string
+	err = json.Unmarshal(b, &symbols)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		s.log.Write(prefix(r), err.Error())
+		return
+	}
+	var symbolsToRemove []string = make([]string, 0)
+	for _, v := range symbols {
+		if n := s.obc.Add(v, -1); n <= 0 {
+			symbolsToRemove = append(symbolsToRemove, v)
+			if n < 0 {
+				s.obc.Set(v, 0)
+			}
+		}
+	}
+
+	if err = s.hb.RemoveOrderBookStream(symbolsToRemove...); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		s.log.Write(prefix(r), err.Error())
+		return
+	}
+	for _, v := range symbols {
+		s.obc.Add(v, 1)
+	}
+	w.WriteHeader(http.StatusOK)
 }
 
 func (s *Router) serveReplies(w http.ResponseWriter, r *http.Request) {
@@ -183,9 +257,10 @@ func (s *Router) serveClusterBuys(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	_, err = w.Write(b)
+	if _, err = w.Write(b); err != nil {
+		s.log.Write(prefix(r), "write", err.Error())
+	}
 
-	return
 }
 
 func (s *Router) serveOiScreener(w http.ResponseWriter, r *http.Request) {
@@ -204,6 +279,26 @@ func (s *Router) serveOiScreener(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	_, err = w.Write(b)
+	if err != nil {
+		s.log.Write(prefix(r), "write", err.Error())
+	}
 
-	return
+}
+
+func prefix(r *http.Request) string {
+	return r.RemoteAddr + " " + r.URL.EscapedPath()
+}
+
+func (s *Router) createUpgrader() {
+	s.u = &websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+		Error: func(w http.ResponseWriter, r *http.Request, status int, reason error) {
+			s.log.Write(prefix(r), reason.Error())
+		},
+		EnableCompression: true,
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
 }

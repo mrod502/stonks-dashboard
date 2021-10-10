@@ -4,9 +4,10 @@ go 1.17
 
 require (
 	github.com/gorilla/mux v1.8.0
+	github.com/gorilla/websocket v1.4.2
 	github.com/mrod502/finviz v0.0.0-20210911015813-06783d78657a
 	github.com/mrod502/go-cache v0.0.0-20210913000143-3f3bdb48d315
-	github.com/mrod502/hitbtc v1.1.4
+	github.com/mrod502/hitbtc v1.2.0
 	github.com/mrod502/logger v1.1.15
 	github.com/mrod502/openinsider v0.0.0-20210925123902-a36121f1a315
 	github.com/mrod502/reddit v0.0.1
@@ -15,7 +16,6 @@ require (
 
 require (
 	github.com/chappjc/logrus-prefix v0.0.0-20180227015900-3a1d64819adb // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
