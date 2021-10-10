@@ -8,7 +8,7 @@ require (
 	github.com/mrod502/finviz v0.0.0-20210911015813-06783d78657a
 	github.com/mrod502/go-cache v0.0.0-20210913000143-3f3bdb48d315
 	github.com/mrod502/hitbtc v1.2.0
-	github.com/mrod502/logger v1.1.16
+	github.com/mrod502/logger v1.1.15
 	github.com/mrod502/openinsider v0.0.0-20210925123902-a36121f1a315
 	github.com/mrod502/reddit v0.0.1
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
