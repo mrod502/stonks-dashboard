@@ -5,15 +5,23 @@ export interface MenuBarItemProps {
     title:string;
     link?:string;
     imgSrc?:string;
+    italic?:boolean;
 
 }
 
-export const MenuBarItem:React.FC<MenuBarItemProps> = ({title}:MenuBarItemProps) =>{
+const mbiStyle = {
+    marginRight: '10px',
+    paddingRight: '10px',
+    borderRight: "solid",
+    borderWidth: 1,
+}
+
+export const MenuBarItem:React.FC<MenuBarItemProps> = ({title, italic}:MenuBarItemProps) =>{
 
 
     return (
-        <div>
+        <div style={mbiStyle}>
             <Typography>{title}</Typography>
         </div>
     )
-}
+}   

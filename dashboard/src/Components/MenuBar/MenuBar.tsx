@@ -10,10 +10,18 @@ export interface MenuBarProps {
     children?: React.ReactNode;
 }
 
+
+
+const menuBarStyle = {
+  backgroundColor:'green'
+} as React.CSSProperties
+
+
+
 const MenuBar:React.FC<MenuBarProps> = ({children}:MenuBarProps) => {
 
   return (
-    <AppBar>
+    <AppBar style={menuBarStyle}>
       <Toolbar>
         {children}
       </Toolbar>

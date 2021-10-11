@@ -64,13 +64,23 @@ export interface RedditTableProps {
 
 }
 
+const tableStyle  = {
+  paper : {
+  overflowY: 'auto',
+  maxHeight: '50%',
+  }
+} as React.CSSProperties
+
+
+
 const RedditTable = ({data}:RedditTableProps) => {
  
   return (
     <div>
-      <span>Reddit</span>
-      <Table>
+      <span style={{position: 'sticky'}}>Reddit</span>
+      <Table style={tableStyle} stickyHeader>
         <TableHead>
+
           <TableCell>Name</TableCell>
           <TableCell>Ups</TableCell>
           <TableCell>Downs</TableCell>

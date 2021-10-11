@@ -1,4 +1,3 @@
-import React from 'react';
 import {fetch} from '../../Utils'
 import { DataGrid, GridColDef, GridValueGetterParams } from '@material-ui/data-grid';
 const FINVIZ_HOME = "finviz-home";
@@ -35,7 +34,7 @@ export const Signal = ({ Ticker, Last, Change, Volume, Signal }:SignalProps) => 
 export const SignalTable = ({Items}:SignalTableProps) => {
 
   return (
-    <div style={{ height: 400, width: '100%' }}>
+    <div style={{height: '100%', width: '100%' }}>
       <span>Finviz</span>
       <DataGrid  
         columns={[

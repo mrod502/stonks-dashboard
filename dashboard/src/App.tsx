@@ -18,6 +18,9 @@ const useStyles = makeStyles((theme) => ({
   paper: {
     padding: theme.spacing(2),
     textAlign: 'center',
+    overflowY: 'auto',
+    maxHeight: '25%',
+    height: '25%',
     color: theme.palette.text.secondary,
   },
 }));
@@ -55,7 +58,11 @@ const App = () => {
   return (
     <div className={`App ${classes.root}`}>
         <MenuBar>
-          <MenuBarItem title="Your wife's boyfriend's favorite website"/>
+          <MenuBarItem title="Your wife's boyfriend's favorite website" italic/>
+          <MenuBarItem title="News"/>
+          <MenuBarItem title="Insights"/>
+          <MenuBarItem title="Subscribe to events"/>
+          <MenuBarItem title="Crypto"/>
         </MenuBar>
         <Grid container spacing={3} alignContent="center">
           <Grid item sm={12} md={9} lg={6}>
