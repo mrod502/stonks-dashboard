@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(2),
     textAlign: 'center',
     overflowY: 'auto',
-    maxHeight: '25%',
+    minHeight: '25%',
     height: '25%',
     color: theme.palette.text.secondary,
   },
@@ -67,7 +67,7 @@ const App = () => {
         <Grid container spacing={3} alignContent="center">
           <Grid item sm={12} md={9} lg={6}>
             <Paper className={classes.paper}>
-              <SignalTable  Items={finvizHome.Signals.Items}/>
+              <SignalTable Items={finvizHome.Signals.Items}/>
             </Paper>
           </Grid>
           <Grid item sm={12} md={9} lg={6}>
