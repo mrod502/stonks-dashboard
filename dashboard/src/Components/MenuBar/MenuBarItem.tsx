@@ -1,26 +1,21 @@
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
+import * as Styles from '../../Styles';
 
 export interface MenuBarItemProps {
     title:string;
     link?:string;
     imgSrc?:string;
-    italic?:boolean;
+    selected?:boolean;
 
 }
 
-const mbiStyle = {
-    marginRight: '10px',
-    paddingRight: '10px',
-    borderRight: "solid",
-    borderWidth: 1,
-}
 
-export const MenuBarItem:React.FC<MenuBarItemProps> = ({title, italic}:MenuBarItemProps) =>{
+export const MenuBarItem:React.FC<MenuBarItemProps> = ({title,selected}:MenuBarItemProps) =>{
 
 
     return (
-        <div style={mbiStyle}>
+        <div style={Styles.MenuBarItem}>
             <Typography>{title}</Typography>
         </div>
     )

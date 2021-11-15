@@ -7,25 +7,27 @@ export enum Condition{
   Eq,
   Neq,
   Regex,
+  Contains,
 };
 
+export interface QueryBase{
+  Limit:number;
+}
 
 
-export interface Query<T>{
+
+export interface Query<T> extends QueryBase{
   V:T;
   C:Condition;
-  S?:string;
   Check:boolean;
 };
 
-export const Build = <T>(v:T,c:Condition,s?:string):Query<T> =>{
+export const Build = <T>(v:T,c:Condition,check?:boolean):Query<T> =>{
+
   let q = {
     V:v,
     C:c,
-    Check:true,
-  }
-  if (s){
-    q.S=s
-  }
-  return q;
+    Check: (check == undefined) ? true : check,
+  } as Query<T>
+    return q;
 }

@@ -2,6 +2,9 @@ import {default as isoFetch} from 'isomorphic-fetch';
 
 export type RequestMethod = "GET" | "PUT" | "POST" | "DELETE" | "PATCH"
 
+export const serverBase = ():string=> `http://${process.env.REACT_APP_SERVER_IP}:${process.env.REACT_APP_SERVER_PORT}`
+export const scraperBase = ():string=> `http://${process.env.REACT_APP_SCRAPER_IP}:${process.env.REACT_APP_SCRAPER_PORT}`
+
 
 export const fetch = async  <R = any>(
   url:string,

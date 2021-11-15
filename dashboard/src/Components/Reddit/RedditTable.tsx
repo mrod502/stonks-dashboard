@@ -4,6 +4,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import { TableBody, TableHead } from '@material-ui/core';
 import fetch from '../../Fetch'
+import * as Styles from '../../Styles'
 
 const REDDIT_BASE = "reddit"
 
@@ -20,7 +21,6 @@ export const RedditLite = ({
     <TableRow>
         <TableCell><a href={`https://www.reddit.com${permalink}`}>{title}</a></TableCell>
         <TableCell>{ups}</TableCell>
-        <TableCell>{downs}</TableCell>
       </TableRow>
   )
 }
@@ -64,12 +64,6 @@ export interface RedditTableProps {
 
 }
 
-const tableStyle  = {
-  paper : {
-  overflowY: 'auto',
-  maxHeight: '50%',
-  }
-} as React.CSSProperties
 
 
 
@@ -78,17 +72,17 @@ const RedditTable = ({data}:RedditTableProps) => {
   return (
     <div>
       <span style={{position: 'sticky'}}>Reddit</span>
-      <Table style={tableStyle} stickyHeader>
+      <Table style={Styles.RedditTable} stickyHeader>
         <TableHead>
-
-          <TableCell>Name</TableCell>
-          <TableCell>Ups</TableCell>
-          <TableCell>Downs</TableCell>
+          <TableRow>
+            <TableCell>Name</TableCell>
+            <TableCell>Ups</TableCell>
+          </TableRow>
         </TableHead>
         <TableBody>{
           data.children.length > 0
-          ? data.children.map( val => <RedditLite {...val.data}/>)
-          : <span>No data available</span>
+          ? data.children.map( val => <RedditLite key={val.data.id} {...val.data}/>)
+          : <TableRow><TableCell align="center" colSpan={2}>No data available</TableCell></TableRow>
           }</TableBody>
       </Table>
     </div>
@@ -98,7 +92,7 @@ const RedditTable = ({data}:RedditTableProps) => {
 export const getSubreddit = async (sub:string):Promise<RedditTableProps> => {
   try{
     console.log(process.env.REACT_APP_SERVER_IP)
-    return await fetch<RedditTableProps>(`http://${process.env.REACT_APP_SERVER_IP}:${process.env.REACT_APP_SERVER_PORT}/${REDDIT_BASE}/${sub}`)
+    return await fetch<RedditTableProps>(`http://www.cloutcomputer.com/${REDDIT_BASE}/${sub}`)
   }catch(err){
     console.error(err)
     return {

@@ -1,17 +1,8 @@
-import {Query, Condition} from './Query';
+import {Query, QueryBase} from './Query';
 
 
-export interface ItemQuery {
-  Created:Query<Date>;
-  Class:Query<string>;
-  Archived:Query<boolean>;
-}
-
-export const Build = ({}):ItemQuery=>{
-
-
-
-  return {
-
-  } as ItemQuery;
+export interface ItemQuery extends QueryBase{
+  Created?:Query<Date>;
+  Class?:Query<string>;
+  Archived?:Query<boolean>;
 }

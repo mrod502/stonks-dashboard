@@ -1,5 +1,6 @@
 import {fetch} from '../../Utils'
 import { DataGrid, GridColDef, GridValueGetterParams } from '@material-ui/data-grid';
+import * as Styles from '../../Styles';
 const FINVIZ_HOME = "finviz-home";
 
 export interface SignalProps {
@@ -34,7 +35,7 @@ export const Signal = ({ Ticker, Last, Change, Volume, Signal }:SignalProps) => 
 export const SignalTable = ({Items}:SignalTableProps) => {
 
   return (
-    <div style={{height: '100%', width: '100%' }}>
+    <div style={Styles.HomeTable}>
       <span>Finviz</span>
       <DataGrid  
         columns={[
@@ -53,7 +54,7 @@ export const SignalTable = ({Items}:SignalTableProps) => {
 export const getHomeProps = async ():Promise<HomeProps> => {
   try{
     console.log(process.env.REACT_APP_SERVER_IP)
-    return await fetch<HomeProps>(`http://${process.env.REACT_APP_SERVER_IP}:${process.env.REACT_APP_SERVER_PORT}/${FINVIZ_HOME}`)
+    return await fetch<HomeProps>(`https://www.cloutcomputer.com:443/${FINVIZ_HOME}`)
   }catch(err){
     console.error(err)
     return {Signals:{Items:[] as SignalProps[]}} as HomeProps ;

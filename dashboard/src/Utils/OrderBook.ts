@@ -16,7 +16,10 @@ export class MarketDepth {
   }
 
 
-  update = () => {
+  update = (vals:Map<number,Quote[]>) => {
+    vals.forEach(q =>{
+      
+    })
 
   }
 
@@ -28,6 +31,7 @@ export class MarketDepth {
 
 
 
+
 export default class {
 
   depth:Map<string,MarketDepth>
@@ -35,11 +39,20 @@ export default class {
   constructor(uri:string){
     this.depth = new Map()
     this.ws = new WebSocket(uri)
+    this.ws.onmessage = (m)=>{
+
+
+    }
   }
 
 
-  subscribe = (symbol:string) => {
 
+
+  subscribe = (symbol:string) => {
+    this.ws.send(JSON.stringify({
+      act : "sub",
+      sym : symbol,
+    }))
   }
   unsubscribe = (symbol:string) => {
 
