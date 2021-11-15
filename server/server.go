@@ -49,10 +49,12 @@ func NewRouter(cfg RouterConfig, log logger.Client) (*Router, error) {
 	if err != nil {
 		return nil, err
 	}
-	hb, err := hitbtc.NewClient()
-	if err != nil {
-		return nil, err
-	}
+	/*
+		hb, err := hitbtc.NewClient()
+		if err != nil {
+			return nil, err
+		}
+	*/
 	oi, _ := openinsider.NewClient(openinsider.Options{
 		Ttl: cfg.CacheExpiration,
 	})
@@ -63,11 +65,11 @@ func NewRouter(cfg RouterConfig, log logger.Client) (*Router, error) {
 		log:   log,
 		red:   reddit.NewClient(cfg.CacheExpiration),
 		fin:   fcli,
-		hb:    hb,
-		port:  cfg.Port,
-		oi:    oi,
-		ob:    gocache.NewInterfaceCache(),
-		obc:   gocache.NewIntCache(),
+		//hb:    hb,
+		port: cfg.Port,
+		oi:   oi,
+		ob:   gocache.NewInterfaceCache(),
+		obc:  gocache.NewIntCache(),
 	}
 	r.createUpgrader()
 	if cfg.CacheExpiration > 0 {
@@ -114,8 +116,8 @@ func (s *Router) setupRoutes() {
 	s.r.HandleFunc("/finviz-home", s.serveFinvizHome)
 	s.r.HandleFunc("/open-insider", s.serveClusterBuys)
 	s.r.HandleFunc("/open-insider/screener", s.serveOiScreener)
-	s.r.HandleFunc("/hitbtc/subscribe", s.subscribeHitBTC)
-	s.r.HandleFunc("/hitbtc/unsubscribe", s.unsubscribeHitBTC)
+	//s.r.HandleFunc("/hitbtc/subscribe", s.subscribeHitBTC)
+	//s.r.HandleFunc("/hitbtc/unsubscribe", s.unsubscribeHitBTC)
 
 }
 
