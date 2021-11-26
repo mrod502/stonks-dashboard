@@ -34,9 +34,9 @@ export const Signal = ({ Ticker, Last, Change, Volume, Signal }:SignalProps) => 
 export const SignalTable = ({Items}:SignalTableProps) => {
 
   return (
-    <div style={{height: '100%', width: '100%' }}>
+    <div style={{height: '100%', width: '100%'}}>
       <span>Finviz</span>
-      <DataGrid  
+      <DataGrid style={{minHeight: '100%'}}
         columns={[
           { field: 'Ticker', headerName: 'Ticker', flex: 1},
           { field: 'Last', headerName: 'Last', flex: 0.8},

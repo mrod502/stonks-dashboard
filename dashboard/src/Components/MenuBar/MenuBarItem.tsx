@@ -16,12 +16,11 @@ const mbiStyle = {
     borderWidth: 1,
 }
 
-export const MenuBarItem:React.FC<MenuBarItemProps> = ({title, italic}:MenuBarItemProps) =>{
-
+export const MenuBarItem:React.FC<MenuBarItemProps> = ({title, link, italic}:MenuBarItemProps) =>{
 
     return (
-        <div style={mbiStyle}>
-            <Typography>{title}</Typography>
+        <div style={mbiStyle} >
+            {link? <a href={link}><Typography>{title}</Typography></a> : <Typography>{title}</Typography>}
         </div>
     )
 }   

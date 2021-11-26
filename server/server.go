@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -11,7 +10,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/mrod502/finviz"
 	gocache "github.com/mrod502/go-cache"
-	"github.com/mrod502/hitbtc"
 	"github.com/mrod502/logger"
 	"github.com/mrod502/openinsider"
 	"github.com/mrod502/reddit"
@@ -29,18 +27,15 @@ type Router struct {
 	log   logger.Client
 	red   *reddit.Client
 	fin   *finviz.Client
-	hb    *hitbtc.Client
-	oi    openinsider.Client
-	u     *websocket.Upgrader
-	port  uint16
+
+	oi   openinsider.Client
+	u    *websocket.Upgrader
+	port uint16
 }
 
 func (s *Router) Serve() error {
 	//initialize data sources
-	err := s.hb.Connect()
-	if err != nil {
-		s.log.Write("ROUTER", "hbtc", "connect", err.Error())
-	}
+
 	return http.ListenAndServe(fmt.Sprintf(":%d", s.port), s.r)
 }
 
@@ -49,10 +44,7 @@ func NewRouter(cfg RouterConfig, log logger.Client) (*Router, error) {
 	if err != nil {
 		return nil, err
 	}
-	hb, err := hitbtc.NewClient()
-	if err != nil {
-		return nil, err
-	}
+
 	oi, _ := openinsider.NewClient(openinsider.Options{
 		Ttl: cfg.CacheExpiration,
 	})
@@ -63,7 +55,6 @@ func NewRouter(cfg RouterConfig, log logger.Client) (*Router, error) {
 		log:   log,
 		red:   reddit.NewClient(cfg.CacheExpiration),
 		fin:   fcli,
-		hb:    hb,
 		port:  cfg.Port,
 		oi:    oi,
 		ob:    gocache.NewInterfaceCache(),
@@ -114,11 +105,12 @@ func (s *Router) setupRoutes() {
 	s.r.HandleFunc("/finviz-home", s.serveFinvizHome)
 	s.r.HandleFunc("/open-insider", s.serveClusterBuys)
 	s.r.HandleFunc("/open-insider/screener", s.serveOiScreener)
-	s.r.HandleFunc("/hitbtc/subscribe", s.subscribeHitBTC)
-	s.r.HandleFunc("/hitbtc/unsubscribe", s.unsubscribeHitBTC)
+	//s.r.HandleFunc("/hitbtc/subscribe", s.subscribeHitBTC)
+	//s.r.HandleFunc("/hitbtc/unsubscribe", s.unsubscribeHitBTC)
 
 }
 
+/*
 func (s *Router) subscribeHitBTC(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -145,7 +137,7 @@ func (s *Router) subscribeHitBTC(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 }
-
+*/
 func (s *Router) addOrderbookListener(w http.ResponseWriter, r *http.Request) error {
 	conn, err := s.u.Upgrade(w, r, nil)
 	if err != nil {
@@ -155,6 +147,7 @@ func (s *Router) addOrderbookListener(w http.ResponseWriter, r *http.Request) er
 	return nil
 }
 
+/*
 func (s *Router) unsubscribeHitBTC(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -189,7 +182,7 @@ func (s *Router) unsubscribeHitBTC(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 }
-
+*/
 func (s *Router) serveReplies(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 

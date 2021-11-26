@@ -8,6 +8,7 @@ import fetch from '../../Fetch'
 const REDDIT_BASE = "reddit"
 
 export const RedditLite = ({
+  id,
   name,
   body,
   title,
@@ -17,7 +18,7 @@ export const RedditLite = ({
 }:T3Data) => {
   
   return (
-    <TableRow>
+    <TableRow key={id}>
         <TableCell><a href={`https://www.reddit.com${permalink}`}>{title}</a></TableCell>
         <TableCell>{ups}</TableCell>
         <TableCell>{downs}</TableCell>
@@ -68,6 +69,7 @@ const tableStyle  = {
   paper : {
   overflowY: 'auto',
   maxHeight: '50%',
+  height: '50%'
   }
 } as React.CSSProperties
 
@@ -78,9 +80,8 @@ const RedditTable = ({data}:RedditTableProps) => {
   return (
     <div>
       <span style={{position: 'sticky'}}>Reddit</span>
-      <Table style={tableStyle} stickyHeader>
+      <Table title="hello" style={tableStyle} stickyHeader>
         <TableHead>
-
           <TableCell>Name</TableCell>
           <TableCell>Ups</TableCell>
           <TableCell>Downs</TableCell>
