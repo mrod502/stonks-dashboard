@@ -1,7 +1,7 @@
 import React from "react";
 import Document from './Document';
 import DocumentProps from "./DocumentProps";
-import {Table, TableRow, TableHead, TableCell} from '@material-ui/core'
+import {Table, TableRow, TableHead, TableCell, TableBody} from '@material-ui/core'
 
 
 interface DocumentTableProps {
@@ -10,19 +10,24 @@ interface DocumentTableProps {
 }
 
 export default ({data}:DocumentTableProps):React.ReactElement =>{
-
+console.log('got data',data)
   return (
     <Table>
       <TableHead>
         <TableCell>Title</TableCell>
         <TableCell>ContentType</TableCell>
         <TableCell>Posted Date</TableCell>
-      </TableHead>{
+      </TableHead>
+      <TableBody>{
         data.map(v =>{
-          <Document {...v}/>
+          return <Document {...v}/>
         })
       }
+      </TableBody>
     </Table>
 
   )
 }
+
+/*
+ */

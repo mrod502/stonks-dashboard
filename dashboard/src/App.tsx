@@ -2,7 +2,7 @@ import './App.css';
 import {useEffect, useState} from 'react';
 import MenuBar from './Components/MenuBar/MenuBar'
 import { MenuBarItem } from './Components'
-import {Home} from './Views'
+import {Home, Explorer} from './Views'
 
 import Tile, {useStyles} from './Components/Utils/Tile';
 
@@ -11,7 +11,13 @@ import {Route, Routes} from 'react-router-dom';
 
 
 const App = () => {
+/*
+TODO: 
+ - Implement useEffect instead of setState for queries
+ - Add Limit Param to queries via header, maybe?
 
+
+*/
   
   const classes = useStyles();
 
@@ -27,7 +33,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Home/>}/>
         <Route path="crypto" element={<Home/>}/>
-        <Route path="market-research" element={<Home/>}/>
+        <Route path="market-research" element={<Explorer/>}/>
       </Routes>
     </div>
   );

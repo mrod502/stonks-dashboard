@@ -30,12 +30,13 @@ handleChange:(v:QCond)=>void;
 }
 
 const ConditionSelector = ({handleChange}:ConditionSelectorProps):React.ReactElement =>{
-
+  const [selectedVal, setSelectedVal] = React.useState<QCond>(1)
 
   return (
     <Select
       label="search type"
-      onChange={e=>handleChange(e.target.value as QCond)}
+      onChange={e=>{handleChange(e.target.value as QCond);setSelectedVal(e.target.value as QCond ?e.target.value as QCond:1 );console.log("selected value:",selectedVal)}}
+      value={selectedVal}
     >
       <MenuItem value={QCond.Eq}>{"=="}</MenuItem>
       <MenuItem value={QCond.Neq}>{"!="}</MenuItem>
@@ -156,7 +157,7 @@ export const StringQueryBuilder = ({onChange, title}:QueryBuilderProps<string>)=
       <span>{title}</span>
       <Checkbox onChange={e=>{setChecked(e.target.checked);}}/>
       <ConditionSelector handleChange={v=>{setCond(v);onChange(theQuery)}}/>
-      <Input type="date" onChange={e=>{setVal(e.target.value);onChange(theQuery)}}/>
+      <Input type="text" onChange={e=>{setVal(e.target.value);onChange(theQuery)}}/>
     </div>
   )
 }
