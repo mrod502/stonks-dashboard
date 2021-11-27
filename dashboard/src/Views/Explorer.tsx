@@ -1,5 +1,5 @@
 import { Grid } from '@material-ui/core';
-import React from 'react';
+import React, { useEffect } from 'react';
 import Tile from '../Components/Utils/Tile';
 import DocumentProps from '../Db/Document/DocumentProps';
 import QDocument from '../Db/Query/QDocument'
@@ -16,24 +16,29 @@ export default () =>{
 
 
 
-  const submitQuery = () =>{
-    fetch<DocumentProps[]>(queryURI, "POST", JSON.stringify(currentQuery)).then((value)=>{
-      console.log("setting data",value)
+  const submitQuery = (q:QDocumentProps) =>{
+    fetch<DocumentProps[]>(queryURI, "POST", JSON.stringify(q)).then((value)=>{
       setData(value)
-      console.log('data',data)
+
     },
     (reason) => console.error(reason)
     ).catch(reason => console.error(reason))
   }
+
+  useEffect(()=>{
+    submitQuery(currentQuery)
+  },[currentQuery])
   
   
   return (
   <Grid container spacing={1}>
   <Tile>
     <QDocument
-      onChange={(q)=>{setCurrentQuery(q);console.log(currentQuery);submitQuery()}}
+      onChange={(q)=>{
+        setCurrentQuery(q)
+      }}
     />
-    <Button onClick ={() =>{submitQuery()}}>Search</Button>
+    <Button onClick ={() =>{submitQuery(currentQuery)}}>Search</Button>
   </Tile>
     <Tile>
       <DocumentTable

@@ -13,10 +13,7 @@ import {Route, Routes} from 'react-router-dom';
 const App = () => {
 /*
 TODO: 
- - Implement useEffect instead of setState for queries
  - Add Limit Param to queries via header, maybe?
-
-
 */
   
   const classes = useStyles();

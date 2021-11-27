@@ -52,7 +52,6 @@ export const SignalTable = ({Items}:SignalTableProps) => {
 
 export const getHomeProps = async ():Promise<HomeProps> => {
   try{
-    console.log(process.env.REACT_APP_SERVER_IP)
     return await fetch<HomeProps>(`http://${process.env.REACT_APP_SERVER_IP}:${process.env.REACT_APP_SERVER_PORT}/${FINVIZ_HOME}`)
   }catch(err){
     console.error(err)

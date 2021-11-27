@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {Input, TableCell} from '@material-ui/core'
 import Query from './Query'
 import QueryProps, {QCond} from './QueryProps';
@@ -27,37 +27,44 @@ interface QItemBuilderProps{
 
 
 export default ({onChange}:QItemBuilderProps):React.ReactElement =>{
+  const [id, setId] = useState<QueryProps<string>>(Query("",1,false))
+  const [created, setCreated] = useState<QueryProps<Date>>(Query(new Date(),1,false))
+  const [docClass, setDocClass] = useState<QueryProps<string>>(Query("",1,false))
+  const [archived, setArchived] = useState<QueryProps<boolean>>(Query(false,1,false))
+  const [tags, setTags] = useState<QueryProps<string>>(Query("",1,false))
 
-  const [qry,setQry] = useState<QItemProps>({
-    Id: Query("",QCond.Eq,false),
-    Created: Query(new Date(),QCond.Eq,false),
-    Class: Query("",QCond.Eq,false),
-    Archived: Query(false,QCond.Eq,false),
-    Tags: Query("",QCond.Eq,false)
-  } as QItemProps)
+  useEffect(()=>{
+    onChange({
+      Id: id,
+      Created: created,
+      Class: docClass,
+      Archived: archived,
+      Tags: tags,
+    })
+  },[id, created, docClass, archived, tags])
 
 
   return (
     <>
     <StringQueryBuilder
       title="Id"
-      onChange={q =>{qry.Id = q;setQry(qry)}}
+      onChange={setId}
     />
     <DateQueryBuilder
       title="Created"
-      onChange={q =>{qry.Created = q;setQry(qry)}}
+      onChange={setCreated}
     />
     <StringQueryBuilder
       title="Class"
-      onChange={q =>{qry.Class = q;setQry(qry)}}
+      onChange={setDocClass}
     />
     <BoolQueryBuilder
-      title="Id"
-      onChange={q =>{qry.Archived = q;setQry(qry)}}
+      title="Archived"
+      onChange={setArchived}
     />
     <StringQueryBuilder
       title="Tags"
-      onChange={q =>{qry.Tags = q;setQry(qry)}}
+      onChange={setTags}
     />
     </>
   )

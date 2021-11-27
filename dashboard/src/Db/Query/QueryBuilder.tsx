@@ -1,5 +1,5 @@
 import { Checkbox, MenuItem, Select } from '@material-ui/core';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Query, {Queryable} from './Query'
 import QueryProps, {QCond} from './QueryProps';
 import QueryBuilderProps from './QueryBuilderProps';
@@ -31,11 +31,18 @@ handleChange:(v:QCond)=>void;
 
 const ConditionSelector = ({handleChange}:ConditionSelectorProps):React.ReactElement =>{
   const [selectedVal, setSelectedVal] = React.useState<QCond>(1)
+  
+  useEffect(() => {
+    handleChange(selectedVal)
+  }, [selectedVal])
 
   return (
     <Select
       label="search type"
-      onChange={e=>{handleChange(e.target.value as QCond);setSelectedVal(e.target.value as QCond ?e.target.value as QCond:1 );console.log("selected value:",selectedVal)}}
+      onChange={e=>{
+        let event = e.target.value as QCond 
+        setSelectedVal(event ? event : 1)
+      }}
       value={selectedVal}
     >
       <MenuItem value={QCond.Eq}>{"=="}</MenuItem>
@@ -57,19 +64,20 @@ export const NumQueryBuilder = ({onChange, title}:QueryBuilderProps<number>)=>{
   const [cond, setCond] = useState<QCond>(QCond.Eq)
   const [checked, setChecked] = useState<boolean>(false)
 
-  const theQuery = {
-    V:val,
-    C:cond,
-    Check:checked
-  }
-  const qry = Query(val,cond,false)
-
+  useEffect(()=>{
+    onChange({
+      V: val,
+      C: cond,
+      Check: checked
+    })
+  },[val,cond,checked])
+  
   return (
     <div>
       <span>{title}</span>
       <Checkbox onChange={e=>{setChecked(e.target.checked);}}/>
-      <ConditionSelector handleChange={v=>{setCond(v);onChange(theQuery)}}/>
-      <Input type="number" onChange={e=>{setVal(+ e.target.value);onChange(theQuery)}}/>
+      <ConditionSelector handleChange={v=>{setCond(v)}}/>
+      <Input type="number" onChange={e=>{setVal(+ e.target.value)}}/>
     </div>
   )
 }
@@ -80,19 +88,21 @@ export const ByteArrQueryBuilder = ({onChange, title}:QueryBuilderProps<Uint8Arr
   const [cond, setCond] = useState<QCond>(QCond.Eq)
   const [checked, setChecked] = useState<boolean>(false)
   const encoder = new TextEncoder()
-  const theQuery = {
-    V:val,
-    C:cond,
-    Check:checked
-  }
-  const qry = Query(val,cond,false)
+
+  useEffect(()=>{
+    onChange({
+      V: val,
+      C: cond,
+      Check: checked
+    })
+  },[val,cond,checked])
 
   return (
     <div>
       <span>{title}</span>
       <Checkbox onChange={e=>{setChecked(e.target.checked);}}/>
-      <ConditionSelector handleChange={v=>{setCond(v);onChange(theQuery)}}/>
-      <Input type="text" onChange={e=>{setVal(encoder.encode(e.target.value));onChange(theQuery)}}/>
+      <ConditionSelector handleChange={v=>{setCond(v)}}/>
+      <Input type="text" onChange={e=>{setVal(encoder.encode(e.target.value))}}/>
     </div>
   )
 }
@@ -101,19 +111,19 @@ export const DateQueryBuilder = ({onChange, title}:QueryBuilderProps<Date>)=>{
   const [val,setVal] = useState<Date>(new Date())
   const [cond, setCond] = useState<QCond>(QCond.Eq)
   const [checked, setChecked] = useState<boolean>(false)
-  const theQuery = {
-    V:val,
-    C:cond,
-    Check:checked
-  }
-  const qry = Query(val,cond,false)
-
+  useEffect(()=>{
+    onChange({
+      V: val,
+      C: cond,
+      Check: checked
+    })
+  },[val,cond,checked])
   return (
     <div>
       <span>{title}</span>
       <Checkbox onChange={e=>{setChecked(e.target.checked);}}/>
-      <ConditionSelector handleChange={v=>{setCond(v);onChange(theQuery)}}/>
-      <Input type="date" onChange={e=>{setVal(new Date(e.target.value));onChange(theQuery)}}/>
+      <ConditionSelector handleChange={v=>{setCond(v)}}/>
+      <Input type="date" onChange={e=>{setVal(new Date(e.target.value))}}/>
     </div>
   )
 }
@@ -123,19 +133,20 @@ export const BoolQueryBuilder = ({onChange, title}:QueryBuilderProps<boolean>)=>
   const [val,setVal] = useState<boolean>(false)
   const [cond, setCond] = useState<QCond>(QCond.Eq)
   const [checked, setChecked] = useState<boolean>(false)
-  const theQuery = {
-    V:val,
-    C:cond,
-    Check:checked
-  }
-  const qry = Query(val,cond,false)
+  useEffect(()=>{
+    onChange({
+      V: val,
+      C: cond,
+      Check: checked
+    })
+  },[val,cond,checked])
 
   return (
     <div>
       <span>{title}</span>
       <Checkbox onChange={e=>{setChecked(e.target.checked);}}/>
-      <ConditionSelector handleChange={v=>{setCond(v);onChange(theQuery)}}/>
-      <Checkbox onChange={e=>{setVal(e.target.checked);onChange(theQuery)}}/>
+      <ConditionSelector handleChange={v=>{setCond(v)}}/>
+      <Checkbox onChange={e=>{setVal(e.target.checked)}}/>
     </div>
   )
 }
@@ -145,19 +156,21 @@ export const StringQueryBuilder = ({onChange, title}:QueryBuilderProps<string>)=
   const [val,setVal] = useState<string>("")
   const [cond, setCond] = useState<QCond>(QCond.Eq)
   const [checked, setChecked] = useState<boolean>(false)
-  const theQuery = {
-    V:val,
-    C:cond,
-    Check:checked
-  }
-  const qry = Query(val,cond,false)
+
+  useEffect(()=>{
+    onChange({
+      V: val,
+      C: cond,
+      Check: checked
+    })
+  },[val,cond,checked])
 
   return (
     <div>
       <span>{title}</span>
       <Checkbox onChange={e=>{setChecked(e.target.checked);}}/>
-      <ConditionSelector handleChange={v=>{setCond(v);onChange(theQuery)}}/>
-      <Input type="text" onChange={e=>{setVal(e.target.value);onChange(theQuery)}}/>
+      <ConditionSelector handleChange={v=>{setCond(v)}}/>
+      <Input type="text" onChange={e=>{setVal(e.target.value)}}/>
     </div>
   )
 }

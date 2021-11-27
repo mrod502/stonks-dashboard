@@ -10,7 +10,6 @@ interface DocumentTableProps {
 }
 
 export default ({data}:DocumentTableProps):React.ReactElement =>{
-console.log('got data',data)
   return (
     <Table>
       <TableHead>
