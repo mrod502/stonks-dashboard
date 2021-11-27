@@ -1,4 +1,4 @@
 import React from "react"
-export {default as Insights} from './Insights';
+export {default as MarketResearch} from './Explorer';
 
 export {default as Home} from './Home'

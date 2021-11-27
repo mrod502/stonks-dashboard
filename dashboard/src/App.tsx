@@ -20,14 +20,14 @@ const App = () => {
         <MenuBar>
           <MenuBarItem title="Home" link='/'/>
           <MenuBarItem title="News" link='news'/>
-          <MenuBarItem title="Insights" link='insights'/>
+          <MenuBarItem title="Market Research" link='market-research'/>
           <MenuBarItem title="Subscribe to events"/>
           <MenuBarItem title="Crypto" link='crypto'/>
         </MenuBar>
       <Routes>
         <Route path="/" element={<Home/>}/>
         <Route path="crypto" element={<Home/>}/>
-        <Route path="insights" element={<Home/>}/>
+        <Route path="market-research" element={<Home/>}/>
       </Routes>
     </div>
   );
