@@ -1,4 +1,5 @@
 import {fetch} from '../../Utils'
+import React from 'react'
 import { DataGrid, GridColDef, GridValueGetterParams } from '@material-ui/data-grid';
 const FINVIZ_HOME = "finviz-home";
 
@@ -32,7 +33,11 @@ export const Signal = ({ Ticker, Last, Change, Volume, Signal }:SignalProps) => 
 )
 
 export const SignalTable = ({Items}:SignalTableProps) => {
-
+  React.useEffect(()=>{
+    Items.forEach((item) =>{
+      scrapeSymbol(item.Ticker)
+    })
+  },[Items])
   return (
     <div style={{height: '100%', width: '100%'}}>
       <span>Finviz</span>
@@ -57,4 +62,8 @@ export const getHomeProps = async ():Promise<HomeProps> => {
     console.error(err)
     return {Signals:{Items:[] as SignalProps[]}} as HomeProps ;
   }
+}
+
+const scrapeSymbol = (symbol:string) => {
+  fetch(`http://${process.env.REACT_APP_SCRAPER_IP}:${process.env.REACT_APP_SCRAPER_PORT}/scrape/${symbol}/pdf`).then(console.info).catch(console.warn)
 }

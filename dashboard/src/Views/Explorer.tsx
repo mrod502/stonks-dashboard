@@ -5,6 +5,7 @@ import DocumentProps from '../Db/Document/DocumentProps';
 import QDocument from '../Db/Query/QDocument'
 import DocumentTable from '../Db/Document/DocumentTable'
 import { fetch } from '../Utils';
+import Scraper from '../Utils/Scraper/Scraper'
 import QDocumentProps, { newQDoc } from '../Db/Query/QDocumentProps';
 import { Button } from '@material-ui/core';
 const queryURI = `http://${process.env.REACT_APP_SCRAPER_IP}:${process.env.REACT_APP_SCRAPER_PORT}/query`
@@ -31,20 +32,25 @@ export default () =>{
   
   
   return (
-  <Grid container spacing={1}>
-  <Tile>
-    <QDocument
-      onChange={(q)=>{
-        setCurrentQuery(q)
-      }}
-    />
-    <Button onClick ={() =>{submitQuery(currentQuery)}}>Search</Button>
-  </Tile>
-    <Tile>
-      <DocumentTable
-        data={data}
+    <div>
+      <Scraper
+        onScrape={setData}
       />
-    </Tile>
-  </Grid>
+      <Grid container spacing={1}>
+        <Tile>
+          <QDocument
+            onChange={(q)=>{
+              setCurrentQuery(q)
+            }}
+          />
+          <Button onClick ={() =>{submitQuery(currentQuery)}}>Search</Button>
+        </Tile>
+        <Tile>
+          <DocumentTable
+            data={data}
+          />
+        </Tile>
+      </Grid>
+    </div>
   )
 }
