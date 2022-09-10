@@ -20,27 +20,23 @@ type RouterConfig struct {
 	Port            uint16        `yaml:"port"`
 }
 type Router struct {
-	r     *mux.Router
-	cache *gocache.InterfaceCache
-	ob    *gocache.InterfaceCache
-	obc   *gocache.IntCache
-	log   logger.Client
-	red   *reddit.Client
-	fin   *finviz.Client
-
+	r    *mux.Router
+	ob   *gocache.Cache[interface{}, string]
+	obc  *gocache.Cache[int, string]
+	log  logger.Client
+	red  *reddit.Client
+	fin  *finviz.Client
 	oi   openinsider.Client
 	u    *websocket.Upgrader
 	port uint16
 }
 
 func (s *Router) Serve() error {
-	//initialize data sources
-
 	return http.ListenAndServe(fmt.Sprintf(":%d", s.port), s.r)
 }
 
 func NewRouter(cfg RouterConfig, log logger.Client) (*Router, error) {
-	fcli, err := finviz.NewClient(finviz.NewOptions().WithCacheDuration(cfg.CacheExpiration))
+	fcli, err := finviz.New(finviz.NewOptions().WithCacheDuration(cfg.CacheExpiration))
 	if err != nil {
 		return nil, err
 	}
@@ -50,27 +46,29 @@ func NewRouter(cfg RouterConfig, log logger.Client) (*Router, error) {
 	})
 
 	r := &Router{
-		r:     mux.NewRouter(),
-		cache: gocache.NewInterfaceCache(),
-		log:   log,
-		red:   reddit.NewClient(cfg.CacheExpiration),
-		fin:   fcli,
-		port:  cfg.Port,
-		oi:    oi,
-		ob:    gocache.NewInterfaceCache(),
-		obc:   gocache.NewIntCache(),
+		r:    mux.NewRouter(),
+		log:  log,
+		red:  reddit.NewClient(cfg.CacheExpiration),
+		fin:  fcli,
+		port: cfg.Port,
+		oi:   oi,
+		ob:   gocache.New[interface{}, string](),
+		obc:  gocache.New[int, string](),
 	}
 	r.createUpgrader()
-	if cfg.CacheExpiration > 0 {
-		logger.Info("CACHE DURATION", fmt.Sprintf("%v", cfg.CacheExpiration))
-		r.cache.WithExpiration(cfg.CacheExpiration)
-	}
+
 	r.setupRoutes()
 	return r, nil
 }
 
+func (s *Router) withLogging(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s.log.Write(r.Method, r.RequestURI)
+		h.ServeHTTP(w, r)
+	})
+}
+
 func (s *Router) serveSubreddits(w http.ResponseWriter, r *http.Request) {
-	s.log.Write("GET", "subreddit", r.RemoteAddr, r.URL.EscapedPath())
 	v, ok := mux.Vars(r)["sub"]
 
 	if !ok {
@@ -99,45 +97,25 @@ func (s *Router) serveSubreddits(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (s *Router) serveFinvizNews(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (s *Router) serveFinvizNewsArticles(w http.ResponseWriter, r *http.Request) {
+
+}
 func (s *Router) setupRoutes() {
 	s.r.HandleFunc("/reddit/{sub}", s.serveSubreddits).Methods(http.MethodGet)
 	s.r.HandleFunc("/reddit/{sub}/{msgId}", s.serveReplies).Methods(http.MethodGet)
-	s.r.HandleFunc("/finviz-home", s.serveFinvizHome)
+	s.r.HandleFunc("/finviz", s.serveFinvizHome)
+	s.r.HandleFunc("/finviz/news", s.serveFinvizNews)
+	s.r.HandleFunc("/finviz/news/articles", s.serveFinvizNewsArticles)
 	s.r.HandleFunc("/open-insider", s.serveClusterBuys)
 	s.r.HandleFunc("/open-insider/screener", s.serveOiScreener)
-	//s.r.HandleFunc("/hitbtc/subscribe", s.subscribeHitBTC)
-	//s.r.HandleFunc("/hitbtc/unsubscribe", s.unsubscribeHitBTC)
+	s.r.Use(s.withLogging)
 
 }
 
-/*
-func (s *Router) subscribeHitBTC(w http.ResponseWriter, r *http.Request) {
-	b, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		s.log.Write(prefix(r), err.Error())
-		return
-	}
-	var symbols []string
-	err = json.Unmarshal(b, &symbols)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		s.log.Write(prefix(r), err.Error())
-		return
-	}
-
-	if err = s.hb.AddOrderBookStream(symbols...); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		s.log.Write(prefix(r), err.Error())
-		return
-	}
-
-	for _, v := range symbols {
-		s.obc.Add(v, 1)
-	}
-	w.WriteHeader(http.StatusOK)
-}
-*/
 func (s *Router) addOrderbookListener(w http.ResponseWriter, r *http.Request) error {
 	conn, err := s.u.Upgrade(w, r, nil)
 	if err != nil {
@@ -147,42 +125,6 @@ func (s *Router) addOrderbookListener(w http.ResponseWriter, r *http.Request) er
 	return nil
 }
 
-/*
-func (s *Router) unsubscribeHitBTC(w http.ResponseWriter, r *http.Request) {
-	b, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		s.log.Write(prefix(r), err.Error())
-		return
-	}
-	var symbols []string
-	err = json.Unmarshal(b, &symbols)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		s.log.Write(prefix(r), err.Error())
-		return
-	}
-	var symbolsToRemove []string = make([]string, 0)
-	for _, v := range symbols {
-		if n := s.obc.Add(v, -1); n <= 0 {
-			symbolsToRemove = append(symbolsToRemove, v)
-			if n < 0 {
-				s.obc.Set(v, 0)
-			}
-		}
-	}
-
-	if err = s.hb.RemoveOrderBookStream(symbolsToRemove...); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		s.log.Write(prefix(r), err.Error())
-		return
-	}
-	for _, v := range symbols {
-		s.obc.Add(v, 1)
-	}
-	w.WriteHeader(http.StatusOK)
-}
-*/
 func (s *Router) serveReplies(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
@@ -214,7 +156,6 @@ func (s *Router) serveReplies(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Router) serveFinvizHome(w http.ResponseWriter, r *http.Request) {
-	s.log.Write("GET", "finviz", r.RemoteAddr)
 	s.createHeaders(w)
 	v, err := s.fin.Home()
 	if err != nil {
