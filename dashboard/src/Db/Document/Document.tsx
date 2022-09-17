@@ -9,7 +9,7 @@ export default ({Id, Title, Source, ContentType, PostedDate}:DocumentProps):Reac
   <TableRow key={Id}>
     <TableCell><a href={Source}>{Title}</a></TableCell>
     <TableCell>{ContentType}</TableCell>
-    <TableCell>{PostedDate}</TableCell>
+    <TableCell>{PostedDate.toString()}</TableCell>
   </TableRow>
 )
 }

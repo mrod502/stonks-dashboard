@@ -22,7 +22,7 @@ export const useStyles = makeStyles((theme) => ({
 }));
 
 
-const Tile:React.FC = ({children})=>{
+const Tile = ({children}:TileProps)=>{
 
 const classes = useStyles()
 
